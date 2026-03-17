@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ES6+ Fundamentals — Bài học tương tác</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0f0f0d;--bg2:#171714;--bg3:#1f1f1b;--bg4:#272722;--line:rgba(255,255,255,0.07);--line2:rgba(255,255,255,0.13);--text:#e8e4d8;--muted:#7a7668;--accent:#c8f060;--accent2:#60c8f0;--accent3:#f0a860;--accent4:#f06088;--mono:'IBM Plex Mono',monospace;--serif:'Fraunces',Georgia,serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.7}
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--line);padding:24px 0;position:sticky;top:0;height:100vh;overflow-y:auto;scrollbar-width:none}
+.sidebar::-webkit-scrollbar{display:none}
+.sidebar-logo{padding:0 20px 20px;border-bottom:1px solid var(--line);margin-bottom:16px}
+.sidebar-logo .kw{font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+.sidebar-logo .ttl{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--text);line-height:1.3}
+.sidebar-progress{padding:0 20px 16px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.progress-label{font-size:10px;color:var(--muted);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-track{height:3px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease}
+.nav-item{display:flex;align-items:center;gap:10px;padding:7px 20px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--bg3)}
+.nav-item.active{color:var(--accent);border-left-color:var(--accent);background:rgba(200,240,96,.05)}
+.nav-item.done .nav-num{background:var(--accent);color:var(--bg)}
+.nav-num{font-size:9px;width:18px;height:18px;border-radius:3px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--muted);font-weight:600}
+.nav-item.active .nav-num{background:rgba(200,240,96,.15);color:var(--accent)}
+.main{padding:0;max-width:780px}
+.lesson{display:none;padding:48px 48px 80px;border-bottom:1px solid var(--line);animation:fadeIn .25s ease}
+.lesson.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.lesson-eyebrow{font-size:10px;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lesson-eyebrow::after{content:'';flex:1;height:1px;background:var(--line2)}
+.lesson-title{font-family:var(--serif);font-size:32px;font-weight:600;line-height:1.2;margin-bottom:8px;color:var(--text)}
+.lesson-subtitle{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.concept{margin-bottom:36px}
+.concept-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.concept-tag{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px}
+.ct-new{background:rgba(200,240,96,.12);color:var(--accent)}
+.ct-old{background:rgba(122,118,104,.2);color:var(--muted)}
+.ct-tip{background:rgba(96,200,240,.12);color:var(--accent2)}
+.ct-warn{background:rgba(240,96,136,.12);color:var(--accent4)}
+.ct-ecom{background:rgba(240,168,96,.12);color:var(--accent3)}
+.concept-name{font-size:15px;font-weight:600;color:var(--text)}
+.concept-body{font-size:13px;color:#b0ac9e;line-height:1.75;margin-bottom:14px}
+.code-wrap{border-radius:8px;overflow:hidden;border:1px solid var(--line2);margin-bottom:8px}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--bg3);border-bottom:1px solid var(--line)}
+.code-label{font-size:10px;color:var(--muted);letter-spacing:.08em}
+.copy-btn{font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;font-family:var(--mono);padding:2px 6px;border-radius:3px;transition:all .15s}
+.copy-btn:hover{color:var(--accent);background:rgba(200,240,96,.08)}
+pre{background:var(--bg2);padding:16px;overflow-x:auto;font-size:12.5px;line-height:1.8;tab-size:2}
+pre code{font-family:var(--mono)}
+.kw{color:#f06088}.fn{color:#c8f060}.str{color:#f0c860}.num{color:#60c8f0}.cmt{color:#4a4840;font-style:italic}.op{color:#c8a8f0}.typ{color:#f0a860}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.compare-label{font-size:10px;color:var(--muted);padding:6px 12px;background:var(--bg3);border:1px solid var(--line);border-bottom:none;border-radius:6px 6px 0 0;letter-spacing:.06em}
+.compare-label.bad{color:var(--accent4)}.compare-label.good{color:var(--accent)}
+.compare .code-wrap{border-radius:0 0 6px 6px;margin-bottom:0}
+.quiz{background:var(--bg2);border:1px solid var(--line2);border-radius:10px;padding:20px;margin:24px 0}
+.quiz-label{font-size:9px;color:var(--accent2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+.quiz-q{font-size:13px;color:var(--text);margin-bottom:14px;line-height:1.6}
+.quiz-options{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.quiz-opt{padding:9px 14px;border-radius:6px;border:1px solid var(--line2);font-size:12px;font-family:var(--mono);cursor:pointer;transition:all .15s;background:var(--bg3);color:var(--text);text-align:left}
+.quiz-opt:hover:not(:disabled){border-color:var(--accent2);color:var(--accent2)}
+.quiz-opt.correct{border-color:var(--accent);background:rgba(200,240,96,.08);color:var(--accent)}
+.quiz-opt.wrong{border-color:var(--accent4);background:rgba(240,96,136,.08);color:var(--accent4)}
+.quiz-opt:disabled{cursor:default}
+.quiz-explanation{display:none;font-size:12px;color:var(--muted);line-height:1.6;padding-top:10px;border-top:1px solid var(--line);margin-top:4px}
+.quiz-explanation.show{display:block}
+.quiz-explanation strong{color:var(--text)}
+.callout{border-radius:6px;padding:12px 14px;font-size:12px;line-height:1.65;margin:14px 0;display:flex;gap:10px}
+.callout-icon{flex-shrink:0;font-size:14px}
+.callout-body{flex:1}
+.callout.tip{background:rgba(96,200,240,.07);border-left:2px solid var(--accent2);color:#a0c8d8}
+.callout.warn{background:rgba(240,96,136,.07);border-left:2px solid var(--accent4);color:#c89098}
+.callout.ecom{background:rgba(240,168,96,.07);border-left:2px solid var(--accent3);color:#c8a070}
+.callout strong{color:var(--text)}
+.lesson-footer{display:flex;align-items:center;justify-content:space-between;margin-top:40px;padding-top:24px;border-top:1px solid var(--line)}
+.complete-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--accent);color:var(--bg);border:none;border-radius:6px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;transition:opacity .15s;letter-spacing:.04em}
+.complete-btn:hover{opacity:.88}
+.complete-btn.done{background:var(--bg4);color:var(--muted);cursor:default}
+.nav-btns{display:flex;gap:8px}
+.nav-btn{padding:10px 16px;background:var(--bg3);color:var(--muted);border:1px solid var(--line2);border-radius:6px;font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .15s}
+.nav-btn:hover{color:var(--text);background:var(--bg4)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.lesson{padding:28px 20px 60px}.compare{grid-template-columns:1fr}.lesson-title{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <span class="kw">Phase 1 · Week 1</span>
+    <span class="ttl">ES6+ Fundamentals</span>
+  </div>
+  <div class="sidebar-progress">
+    <div class="progress-label"><span>Tiến độ</span><span id="prog-label">0 / 7</span></div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div id="nav-list"></div>
+</nav>
+
+<main class="main">
+
+<!-- LESSON 1 -->
+<section class="lesson active" data-id="0">
+  <div class="lesson-eyebrow">Bài 1 · Variables</div>
+  <h1 class="lesson-title">let, const và<br><em style="font-style:italic;font-weight:300">tại sao var là vấn đề</em></h1>
+  <p class="lesson-subtitle">Hiểu sự khác biệt về scope và mutability — foundation của mọi code JS hiện đại.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-old">Cũ — tránh dùng</span><span class="concept-name">var — function scope, bị hoisting</span></div>
+    <p class="concept-body"><code>var</code> tồn tại trong phạm vi function, không phải block. Bị <strong>hoisting</strong> — khai báo đưa lên đầu nhưng giá trị thì không. Tạo ra bugs khó debug.</p>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">var — behaviour nguy hiểm</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// 1. Hoisting — không báo lỗi dù dùng trước khai báo</span>
+<span class="fn">console</span>.<span class="fn">log</span>(name); <span class="cmt">// undefined (không phải lỗi!)</span>
+<span class="kw">var</span> name = <span class="str">'Nam'</span>;
+
+<span class="cmt">// 2. Không có block scope — if/for không tạo scope mới</span>
+<span class="kw">if</span> (<span class="kw">true</span>) {
+  <span class="kw">var</span> secret = <span class="str">'leaked!'</span>;
+}
+<span class="fn">console</span>.<span class="fn">log</span>(secret); <span class="cmt">// 'leaked!' — thoát ra ngoài block</span>
+
+<span class="cmt">// 3. Re-declare không báo lỗi</span>
+<span class="kw">var</span> user = <span class="str">'Alice'</span>;
+<span class="kw">var</span> user = <span class="str">'Bob'</span>; <span class="cmt">// JS không phàn nàn</span></code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6 · Dùng thay thế</span><span class="concept-name">let — block scope, re-assignable</span></div>
+    <p class="concept-body"><code>let</code> chỉ tồn tại trong block <code>{}</code> gần nhất. Có thể thay đổi giá trị nhưng không thể re-declare trong cùng scope.</p>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">let — block scope</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">let</span> count = <span class="num">0</span>;
+count<span class="op">++</span>; <span class="cmt">// OK — re-assign được</span>
+
+<span class="kw">if</span> (<span class="kw">true</span>) {
+  <span class="kw">let</span> blockScoped = <span class="str">'chỉ trong đây'</span>;
+  <span class="fn">console</span>.<span class="fn">log</span>(blockScoped); <span class="cmt">// OK</span>
+}
+<span class="cmt">// console.log(blockScoped); // ReferenceError</span>
+
+<span class="cmt">// Dùng let trong for loop — mỗi iteration có scope riêng</span>
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i <span class="op">&lt;</span> <span class="num">3</span>; i<span class="op">++</span>) {
+  <span class="fn">setTimeout</span>(() <span class="op">=></span> <span class="fn">console</span>.<span class="fn">log</span>(i), <span class="num">100</span>);
+  <span class="cmt">// 0, 1, 2 — đúng (var sẽ cho 3, 3, 3)</span>
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6 · Default choice</span><span class="concept-name">const — block scope, immutable binding</span></div>
+    <p class="concept-body"><code>const</code> không thể re-assign. Nhưng nếu giá trị là object/array, <strong>nội dung bên trong vẫn thay đổi được</strong> — chỉ binding là constant.</p>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">const — immutable binding, mutable content</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> PI = <span class="num">3.14</span>;
+<span class="cmt">// PI = 3; // TypeError</span>
+
+<span class="cmt">// Object: binding không đổi, properties có thể đổi</span>
+<span class="kw">const</span> user = { name: <span class="str">'Alice'</span>, age: <span class="num">25</span> };
+user.age = <span class="num">26</span>;    <span class="cmt">// OK — đổi property</span>
+<span class="cmt">// user = {};    // TypeError — re-assign</span>
+
+<span class="cmt">// Array: push/pop được, re-assign không được</span>
+<span class="kw">const</span> items = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+items.<span class="fn">push</span>(<span class="num">4</span>); <span class="cmt">// OK</span>
+<span class="cmt">// items = []; // TypeError</span></code></pre>
+    </div>
+    <div class="callout tip"><div class="callout-icon">→</div><div class="callout-body"><strong>Rule of thumb:</strong> Luôn dùng <code>const</code> mặc định. Chỉ đổi sang <code>let</code> khi cần re-assign. Không bao giờ dùng <code>var</code>.</div></div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Đoạn code sau in ra gì?<br><code style="font-size:11px;background:var(--bg3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px">const cart = ['táo', 'xoài']; cart.push('cam'); console.log(cart.length);</code></p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. TypeError — cart là const</button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. 3 — push thay đổi nội dung, không re-assign</button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. 2 — const không cho phép thay đổi</button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> <code>const</code> chỉ ngăn re-assign binding. Nội dung array hoàn toàn thay đổi được qua <code>push</code>, <code>pop</code>, <code>splice</code>, v.v.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,0)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" disabled>← Trước</button><button class="nav-btn" onclick="goTo(1)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 2 -->
+<section class="lesson" data-id="1">
+  <div class="lesson-eyebrow">Bài 2 · Functions</div>
+  <h1 class="lesson-title">Arrow Functions<br><em style="font-style:italic;font-weight:300">cú pháp gọn và this lexical</em></h1>
+  <p class="lesson-subtitle">Arrow function không chỉ là cú pháp ngắn — nó thay đổi cách <code>this</code> hoạt động, giải quyết một trong những bug phổ biến nhất của JS cũ.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Syntax — từ dài đến ngắn</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">4 cách viết — cùng kết quả</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// 1. Function declaration truyền thống</span>
+<span class="kw">function</span> <span class="fn">add</span>(a, b) { <span class="kw">return</span> a <span class="op">+</span> b; }
+
+<span class="cmt">// 2. Function expression</span>
+<span class="kw">const</span> add = <span class="kw">function</span>(a, b) { <span class="kw">return</span> a <span class="op">+</span> b; };
+
+<span class="cmt">// 3. Arrow — đầy đủ</span>
+<span class="kw">const</span> add = (a, b) <span class="op">=></span> { <span class="kw">return</span> a <span class="op">+</span> b; };
+
+<span class="cmt">// 4. Arrow — implicit return (1 expression)</span>
+<span class="kw">const</span> add = (a, b) <span class="op">=></span> a <span class="op">+</span> b;
+
+<span class="cmt">// Return object — phải bọc trong ()</span>
+<span class="kw">const</span> <span class="fn">makeUser</span> = (name) <span class="op">=></span> ({ name, role: <span class="str">'user'</span> });
+<span class="fn">makeUser</span>(<span class="str">'Alice'</span>); <span class="cmt">// { name: 'Alice', role: 'user' }</span></code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">Quan trọng</span><span class="concept-name">this — lexical binding</span></div>
+    <p class="concept-body">Arrow function không có <code>this</code> riêng — kế thừa <code>this</code> từ scope bên ngoài nơi nó được định nghĩa.</p>
+    <div class="compare">
+      <div class="compare-col">
+        <div class="compare-label bad">Function thường — this bị mất</div>
+        <div class="code-wrap"><pre><code><span class="kw">const</span> timer = {
+  seconds: <span class="num">0</span>,
+  <span class="fn">start</span>: <span class="kw">function</span>() {
+    <span class="fn">setInterval</span>(<span class="kw">function</span>() {
+      <span class="cmt">// this = window!</span>
+      <span class="kw">this</span>.seconds<span class="op">++</span>; <span class="cmt">// BUG</span>
+    }, <span class="num">1000</span>);
+  }
+};</code></pre></div>
+      </div>
+      <div class="compare-col">
+        <div class="compare-label good">Arrow function — this được giữ</div>
+        <div class="code-wrap"><pre><code><span class="kw">const</span> timer = {
+  seconds: <span class="num">0</span>,
+  <span class="fn">start</span>: <span class="kw">function</span>() {
+    <span class="fn">setInterval</span>(() <span class="op">=></span> {
+      <span class="cmt">// this = timer ✓</span>
+      <span class="kw">this</span>.seconds<span class="op">++</span>; <span class="cmt">// OK</span>
+    }, <span class="num">1000</span>);
+  }
+};</code></pre></div>
+      </div>
+    </div>
+    <div class="callout ecom"><div class="callout-icon">→</div><div class="callout-body"><strong>Trong React/NestJS:</strong> Arrow function dùng khắp nơi — event handlers, array methods, useEffect callbacks. Bạn sẽ ít khi cần <code>function</code> keyword.</div></div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-tip">Hay dùng</span><span class="concept-name">Arrow + Array methods</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Pattern phổ biến nhất trong ecommerce</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> products = [
+  { id: <span class="num">1</span>, name: <span class="str">'Áo'</span>, price: <span class="num">200000</span>, inStock: <span class="kw">true</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Quần'</span>, price: <span class="num">350000</span>, inStock: <span class="kw">false</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'Giày'</span>, price: <span class="num">500000</span>, inStock: <span class="kw">true</span> },
+];
+
+<span class="kw">const</span> available = products.<span class="fn">filter</span>(p <span class="op">=></span> p.inStock);
+<span class="kw">const</span> prices    = products.<span class="fn">map</span>(p <span class="op">=></span> p.price);
+<span class="kw">const</span> total     = products.<span class="fn">reduce</span>((sum, p) <span class="op">=></span> sum <span class="op">+</span> p.price, <span class="num">0</span>);
+
+<span class="cmt">// Chaining</span>
+<span class="kw">const</span> names = products
+  .<span class="fn">filter</span>(p <span class="op">=></span> p.inStock)
+  .<span class="fn">map</span>(p <span class="op">=></span> p.name);
+<span class="cmt">// ['Áo', 'Giày']</span></code></pre>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Arrow function khác function thường ở điểm nào quan trọng nhất?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. Arrow function không có return</button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. Arrow function không có this riêng — kế thừa từ scope ngoài</button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. Arrow function chỉ dùng được với 1 parameter</button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> Arrow function có <em>lexical this</em> — <code>this</code> được xác định lúc định nghĩa, không phải lúc gọi. Điều này giải quyết rất nhiều bug <code>this</code> trong callbacks.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,1)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(0)">← Trước</button><button class="nav-btn" onclick="goTo(2)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 3 -->
+<section class="lesson" data-id="2">
+  <div class="lesson-eyebrow">Bài 3 · Syntax</div>
+  <h1 class="lesson-title">Destructuring<br><em style="font-style:italic;font-weight:300">unpack objects và arrays gọn gàng</em></h1>
+  <p class="lesson-subtitle">Một trong những feature dùng nhiều nhất trong React — props, hook returns, API response handling.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Object destructuring</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Object — theo tên field</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> user = { name: <span class="str">'Alice'</span>, age: <span class="num">28</span>, role: <span class="str">'admin'</span> };
+
+<span class="cmt">// Cách cũ</span>
+<span class="kw">const</span> name = user.name;
+<span class="kw">const</span> age  = user.age;
+
+<span class="cmt">// Destructuring — 1 dòng</span>
+<span class="kw">const</span> { name, age, role } = user;
+
+<span class="cmt">// Đổi tên</span>
+<span class="kw">const</span> { name: userName, role: userRole } = user;
+
+<span class="cmt">// Default value khi field là undefined</span>
+<span class="kw">const</span> { name, avatar = <span class="str">'/default.png'</span> } = user;
+
+<span class="cmt">// Nested destructuring</span>
+<span class="kw">const</span> order = { id: <span class="num">1</span>, customer: { name: <span class="str">'Bob'</span>, city: <span class="str">'HN'</span> } };
+<span class="kw">const</span> { customer: { name: custName, city } } = order;</code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Array destructuring</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Array — theo vị trí</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> coords = [<span class="num">10.776</span>, <span class="num">106.700</span>];
+<span class="kw">const</span> [lat, lng] = coords;
+
+<span class="cmt">// Skip phần tử bằng dấu phẩy</span>
+<span class="kw">const</span> [first, , third] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+
+<span class="cmt">// Rest — lấy phần còn lại</span>
+<span class="kw">const</span> [head, ...tail] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>];
+<span class="cmt">// head=1, tail=[2,3,4]</span>
+
+<span class="cmt">// Swap variables</span>
+<span class="kw">let</span> [a, b] = [<span class="num">1</span>, <span class="num">2</span>];
+[a, b] = [b, a]; <span class="cmt">// a=2, b=1</span>
+
+<span class="cmt">// useState hook — array destructuring</span>
+<span class="kw">const</span> [count, setCount] = <span class="fn">useState</span>(<span class="num">0</span>);</code></pre>
+    </div>
+    <div class="callout ecom"><div class="callout-icon">→</div><div class="callout-body"><strong>Trong React:</strong> <code>const [state, setState] = useState()</code> là array destructuring. <code>const { data, isLoading } = useQuery()</code> là object destructuring. Bạn dùng cả hai hàng trăm lần mỗi ngày.</div></div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-tip">Pattern hay</span><span class="concept-name">Destructuring trong function parameters</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Props destructuring — React chuẩn</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// Không destructure — verbose</span>
+<span class="kw">function</span> <span class="fn">ProductCard</span>(props) {
+  <span class="kw">return</span> props.name <span class="op">+</span> <span class="str">' — '</span> <span class="op">+</span> props.price;
+}
+
+<span class="cmt">// Destructure trong params — clean</span>
+<span class="kw">function</span> <span class="fn">ProductCard</span>({ name, price, inStock = <span class="kw">true</span> }) {
+  <span class="kw">return</span> `${name} — ${price.toLocaleString()}₫`;
+}
+
+<span class="cmt">// NestJS service — destructure API response</span>
+<span class="kw">async function</span> <span class="fn">loadOrder</span>(id) {
+  <span class="kw">const</span> { data: { order, customer } } = <span class="kw">await</span> <span class="fn">fetchOrder</span>(id);
+  <span class="kw">return</span> { order, customer };
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Kết quả của đoạn này?<br><code style="font-size:11px;background:var(--bg3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px">const { name, price = 0 } = { name: 'Áo' }; console.log(price);</code></p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. undefined</button>
+      <button class="quiz-opt" onclick="answer(this,false)">B. ReferenceError</button>
+      <button class="quiz-opt" onclick="answer(this,true)">C. 0 — default value khi field là undefined</button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> Default value trong destructuring chỉ kích hoạt khi field là <code>undefined</code>. Nếu field là <code>null</code>, default KHÔNG được dùng — <code>null</code> là giá trị explicit.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,2)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(1)">← Trước</button><button class="nav-btn" onclick="goTo(3)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 4 -->
+<section class="lesson" data-id="3">
+  <div class="lesson-eyebrow">Bài 4 · Syntax</div>
+  <h1 class="lesson-title">Spread & Rest <code style="font-size:22px">...</code><br><em style="font-style:italic;font-weight:300">3 dấu chấm, 2 công dụng ngược nhau</em></h1>
+  <p class="lesson-subtitle">Cùng syntax <code>...</code> nhưng làm 2 việc trái ngược: spread mở rộng ra, rest gom lại. Context quyết định.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Spread — mở rộng array/object</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Spread operator</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// Clone array</span>
+<span class="kw">const</span> original = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>];
+<span class="kw">const</span> copy = [...original];
+
+<span class="cmt">// Merge arrays</span>
+<span class="kw">const</span> merged = [...original, <span class="num">4</span>, <span class="num">5</span>]; <span class="cmt">// [1,2,3,4,5]</span>
+
+<span class="cmt">// Clone + update object</span>
+<span class="kw">const</span> user = { name: <span class="str">'Alice'</span>, age: <span class="num">25</span> };
+<span class="kw">const</span> updated = { ...user, age: <span class="num">26</span> }; <span class="cmt">// override age</span>
+
+<span class="cmt">// Merge objects — sau ghi đè trước</span>
+<span class="kw">const</span> defaults = { theme: <span class="str">'light'</span>, lang: <span class="str">'vi'</span>, size: <span class="str">'md'</span> };
+<span class="kw">const</span> config   = { size: <span class="str">'lg'</span>, debug: <span class="kw">true</span> };
+<span class="kw">const</span> final    = { ...defaults, ...config };
+<span class="cmt">// { theme:'light', lang:'vi', size:'lg', debug:true }</span>
+
+<span class="cmt">// Thêm item vào cart — immutable pattern</span>
+<span class="kw">const</span> <span class="fn">addToCart</span> = (cart, item) <span class="op">=></span> [...cart, item];</code></pre>
+    </div>
+    <div class="callout ecom"><div class="callout-icon">→</div><div class="callout-body"><strong>Trong React state:</strong> Luôn dùng spread khi update state — không mutate trực tiếp. <code>setUser({...user, age: 26})</code> thay vì <code>user.age = 26</code>. React dùng reference equality để detect changes.</div></div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Rest — gom phần còn lại</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Rest trong params và destructuring</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// Rest params — nhận nhiều args thành array</span>
+<span class="kw">const</span> <span class="fn">sum</span> = (...numbers) <span class="op">=></span>
+  numbers.<span class="fn">reduce</span>((acc, n) <span class="op">=></span> acc <span class="op">+</span> n, <span class="num">0</span>);
+<span class="fn">sum</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>); <span class="cmt">// 10</span>
+
+<span class="cmt">// Rest trong object destructuring</span>
+<span class="cmt">// Lọc sensitive fields — pattern NestJS response</span>
+<span class="kw">const</span> { id, passwordHash, ...publicData } = userFromDB;
+<span class="cmt">// publicData = { name, email, role } — không có passwordHash</span>
+
+<span class="cmt">// Rest trong array destructuring</span>
+<span class="kw">const</span> [first, second, ...rest] = [<span class="num">10</span>, <span class="num">20</span>, <span class="num">30</span>, <span class="num">40</span>];
+<span class="cmt">// first=10, second=20, rest=[30,40]</span></code></pre>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Trong NestJS, <code>userFromDB</code> có <code>id, name, email, passwordHash</code>. Cách nào đúng để trả về user KHÔNG có <code>passwordHash</code>?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. <code>delete userFromDB.passwordHash; return userFromDB;</code></button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. <code>const { passwordHash, ...safeUser } = userFromDB; return safeUser;</code></button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. <code>return userFromDB.filter(f => f !== 'passwordHash');</code></button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> Rest destructuring tách <code>passwordHash</code> ra biến riêng và gom phần còn lại vào <code>safeUser</code>. Pattern chuẩn trong NestJS để sanitize response — không mutate object gốc.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,3)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(2)">← Trước</button><button class="nav-btn" onclick="goTo(4)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 5 -->
+<section class="lesson" data-id="4">
+  <div class="lesson-eyebrow">Bài 5 · Syntax</div>
+  <h1 class="lesson-title">Template Literals<br><em style="font-style:italic;font-weight:300">& Optional Chaining <code style="font-size:20px">?.</code></em></h1>
+  <p class="lesson-subtitle">Hai feature giúp code sạch hơn và an toàn hơn khi làm việc với data có thể undefined.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES6</span><span class="concept-name">Template literals — string interpolation</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Backtick strings</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> product = { name: <span class="str">'Áo polo'</span>, price: <span class="num">299000</span> };
+
+<span class="cmt">// Cách cũ — nối chuỗi thủ công</span>
+<span class="kw">const</span> msg = <span class="str">'Sản phẩm: '</span> <span class="op">+</span> product.name <span class="op">+</span> <span class="str">' — '</span> <span class="op">+</span> product.price <span class="op">+</span> <span class="str">'₫'</span>;
+
+<span class="cmt">// Template literal — gọn và dễ đọc</span>
+<span class="kw">const</span> msg = `Sản phẩm: ${product.name} — ${product.price.toLocaleString()}₫`;
+
+<span class="cmt">// Expression bên trong ${}</span>
+<span class="kw">const</span> discount = <span class="num">10</span>;
+<span class="kw">const</span> final = `Sau giảm ${discount}%: ${product.price * (<span class="num">1</span> <span class="op">-</span> discount<span class="op">/</span><span class="num">100</span>)}₫`;
+
+<span class="cmt">// Multi-line string</span>
+<span class="kw">const</span> html = `
+  &lt;div class="product"&gt;
+    &lt;h2&gt;${product.name}&lt;/h2&gt;
+    &lt;p&gt;${product.price.toLocaleString()}₫&lt;/p&gt;
+  &lt;/div&gt;
+`;</code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ES2020</span><span class="concept-name">Optional chaining <code>?.</code> — truy cập an toàn</span></div>
+    <p class="concept-body">Thay vì kiểm tra null/undefined từng bước, <code>?.</code> trả về <code>undefined</code> ngay khi gặp giá trị null/undefined — không throw error.</p>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">?. và ?? (nullish coalescing)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> order = { id: <span class="num">1</span>, customer: { name: <span class="str">'Alice'</span> } };
+<span class="cmt">// shipping là undefined</span>
+
+<span class="cmt">// Cách cũ — dễ crash</span>
+<span class="kw">const</span> city = order <span class="op">&amp;&amp;</span> order.shipping <span class="op">&amp;&amp;</span> order.shipping.address
+  <span class="op">&amp;&amp;</span> order.shipping.address.city;
+
+<span class="cmt">// Optional chaining — gọn, an toàn</span>
+<span class="kw">const</span> city = order?.shipping?.address?.city;
+<span class="cmt">// undefined — không throw error</span>
+
+<span class="cmt">// Kết hợp ?? để có default value</span>
+<span class="kw">const</span> city = order?.shipping?.address?.city <span class="op">??</span> <span class="str">'Chưa có địa chỉ'</span>;
+
+<span class="cmt">// ?? vs || — khác biệt quan trọng</span>
+<span class="kw">const</span> price = <span class="num">0</span>;
+<span class="fn">console</span>.<span class="fn">log</span>(price <span class="op">||</span> <span class="num">100</span>);  <span class="cmt">// 100 — 0 là falsy!</span>
+<span class="fn">console</span>.<span class="fn">log</span>(price <span class="op">??</span> <span class="num">100</span>);  <span class="cmt">// 0  — ?? chỉ check null/undefined</span>
+
+<span class="cmt">// Optional chaining với method và array</span>
+<span class="kw">const</span> upper = user?.name?.<span class="fn">toUpperCase</span>();
+<span class="kw">const</span> first = arr?.[<span class="num">0</span>];</code></pre>
+    </div>
+    <div class="callout ecom"><div class="callout-icon">→</div><div class="callout-body"><strong>Trong ecommerce:</strong> API response không phải lúc nào cũng đầy đủ. <code>product?.variants?.[0]?.price ?? 0</code> an toàn hơn nhiều so với access thẳng.</div></div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Tại sao nên dùng <code>??</code> thay vì <code>||</code> khi set default value cho price?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. <code>??</code> nhanh hơn <code>||</code></button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. <code>||</code> coi 0, '', false là falsy nên bị replace — <code>??</code> chỉ check null/undefined</button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. Không có sự khác biệt trong thực tế</button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> <code>price || 0</code> sẽ dùng default ngay cả khi price = 0 (vì 0 là falsy). Bug điển hình trong ecommerce khi sản phẩm miễn phí. <code>price ?? 0</code> chỉ dùng default khi price là <code>null</code> hoặc <code>undefined</code>.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,4)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(3)">← Trước</button><button class="nav-btn" onclick="goTo(5)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 6 -->
+<section class="lesson" data-id="5">
+  <div class="lesson-eyebrow">Bài 6 · Modules</div>
+  <h1 class="lesson-title">ES Modules<br><em style="font-style:italic;font-weight:300">import / export — tổ chức code</em></h1>
+  <p class="lesson-subtitle">TypeScript, Next.js, NestJS đều dùng ESM syntax. Học một lần, dùng ở cả frontend lẫn backend.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ESM</span><span class="concept-name">Named exports & imports</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">utils/price.js — named exports</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">export const</span> <span class="fn">formatPrice</span> = (price) <span class="op">=></span>
+  `${price.toLocaleString(<span class="str">'vi-VN'</span>)}₫`;
+
+<span class="kw">export const</span> <span class="fn">calcDiscount</span> = (price, pct) <span class="op">=></span>
+  price <span class="op">*</span> (<span class="num">1</span> <span class="op">-</span> pct <span class="op">/</span> <span class="num">100</span>);
+
+<span class="kw">export const</span> TAX_RATE = <span class="num">0.1</span>;
+
+<span class="cmt">// Hoặc export cuối file</span>
+<span class="kw">const</span> <span class="fn">validatePrice</span> = (p) <span class="op">=></span> p <span class="op">></span> <span class="num">0</span>;
+<span class="kw">export</span> { validatePrice };</code></pre>
+    </div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">components/ProductCard.js — imports</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// Chỉ lấy cái cần</span>
+<span class="kw">import</span> { formatPrice, calcDiscount } <span class="kw">from</span> <span class="str">'../utils/price'</span>;
+
+<span class="cmt">// Import tất cả vào namespace</span>
+<span class="kw">import</span> <span class="op">*</span> <span class="kw">as</span> PriceUtils <span class="kw">from</span> <span class="str">'../utils/price'</span>;
+PriceUtils.<span class="fn">formatPrice</span>(<span class="num">100000</span>);
+
+<span class="cmt">// Đổi tên khi import</span>
+<span class="kw">import</span> { formatPrice <span class="kw">as</span> fmt } <span class="kw">from</span> <span class="str">'../utils/price'</span>;</code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">ESM</span><span class="concept-name">Default export & dynamic import</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Default + dynamic import</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// Default export — 1 giá trị chính, thường là component</span>
+<span class="kw">export default function</span> <span class="fn">ProductCard</span>({ name, price }) {
+  <span class="kw">return</span> `&lt;div&gt;${name}: ${price}&lt;/div&gt;`;
+}
+
+<span class="cmt">// Import default — đặt tên tùy ý</span>
+<span class="kw">import</span> Card <span class="kw">from</span> <span class="str">'./ProductCard'</span>;
+
+<span class="cmt">// Mix default + named</span>
+<span class="kw">import</span> ProductCard, { formatPrice } <span class="kw">from</span> <span class="str">'./ProductCard'</span>;
+
+<span class="cmt">// Dynamic import — lazy loading (Next.js code splitting)</span>
+<span class="kw">const</span> Chart = <span class="kw">await</span> <span class="kw">import</span>(<span class="str">'./HeavyChart'</span>);
+
+<span class="cmt">// Trong Next.js</span>
+<span class="kw">import</span> dynamic <span class="kw">from</span> <span class="str">'next/dynamic'</span>;
+<span class="kw">const</span> Chart = <span class="fn">dynamic</span>(() <span class="op">=></span> <span class="kw">import</span>(<span class="str">'./Chart'</span>), { ssr: <span class="kw">false</span> });</code></pre>
+    </div>
+    <div class="callout tip"><div class="callout-icon">→</div><div class="callout-body"><strong>Convention:</strong> React components dùng default export. Utilities, hooks, constants dùng named exports. Giúp import rõ ràng và IDE refactoring dễ hơn.</div></div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Kiểm tra nhanh</div>
+    <p class="quiz-q">Trong file <code>auth.js</code>: <code>export default AuthService</code> và <code>export const JWT_SECRET = '...'</code>. Import nào đúng?</p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. <code>import { AuthService, JWT_SECRET } from './auth'</code></button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. <code>import AuthService, { JWT_SECRET } from './auth'</code></button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. <code>import { default: AuthService, JWT_SECRET } from './auth'</code></button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng.</strong> Default export import không có ngoặc nhọn, named export thì có. <code>import DefaultExport, { namedExport } from './file'</code> là cú pháp chuẩn.</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,5)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(4)">← Trước</button><button class="nav-btn" onclick="goTo(6)">Tiếp →</button></div>
+  </div>
+</section>
+
+<!-- LESSON 7 -->
+<section class="lesson" data-id="6">
+  <div class="lesson-eyebrow">Bài 7 · Arrays</div>
+  <h1 class="lesson-title">Array Methods<br><em style="font-style:italic;font-weight:300">map · filter · reduce · find</em></h1>
+  <p class="lesson-subtitle">4 methods này xuất hiện trong mọi codebase. Hiểu chúng sâu là hiểu cách React render list, NestJS transform data, và xử lý API response.</p>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">Core</span><span class="concept-name">map — transform từng phần tử</span></div>
+    <p class="concept-body">Trả về array mới cùng độ dài, mỗi phần tử đã được transform. Không thay đổi array gốc.</p>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">map trong ecommerce</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> products = [
+  { id: <span class="num">1</span>, name: <span class="str">'Áo'</span>, price: <span class="num">200000</span> },
+  { id: <span class="num">2</span>, name: <span class="str">'Quần'</span>, price: <span class="num">350000</span> },
+];
+
+<span class="cmt">// Thêm field discountedPrice</span>
+<span class="kw">const</span> withDiscount = products.<span class="fn">map</span>(p <span class="op">=></span> ({
+  ...p,
+  discountedPrice: p.price <span class="op">*</span> <span class="num">0.9</span>,
+}));
+
+<span class="cmt">// React — render list</span>
+<span class="kw">const</span> items = products.<span class="fn">map</span>(p <span class="op">=></span>
+  `&lt;li key={p.id}&gt;{p.name}&lt;/li&gt;`
+);
+
+<span class="cmt">// Extract IDs</span>
+<span class="kw">const</span> ids = products.<span class="fn">map</span>(p <span class="op">=></span> p.id); <span class="cmt">// [1, 2]</span></code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">Core</span><span class="concept-name">filter — lọc theo điều kiện</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">filter — lọc sản phẩm</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> products = [
+  { id: <span class="num">1</span>, name: <span class="str">'Áo'</span>,   price: <span class="num">200000</span>, inStock: <span class="kw">true</span>  },
+  { id: <span class="num">2</span>, name: <span class="str">'Quần'</span>, price: <span class="num">350000</span>, inStock: <span class="kw">false</span> },
+  { id: <span class="num">3</span>, name: <span class="str">'Giày'</span>, price: <span class="num">500000</span>, inStock: <span class="kw">true</span>  },
+];
+
+<span class="kw">const</span> available  = products.<span class="fn">filter</span>(p <span class="op">=></span> p.inStock);
+<span class="kw">const</span> affordable = products.<span class="fn">filter</span>(p <span class="op">=></span> p.price <span class="op">&lt;=</span> <span class="num">300000</span>);
+
+<span class="cmt">// Xóa item khỏi cart — immutable</span>
+<span class="kw">const</span> <span class="fn">removeFromCart</span> = (cart, itemId) <span class="op">=></span>
+  cart.<span class="fn">filter</span>(item <span class="op">=></span> item.id <span class="op">!==</span> itemId);
+
+<span class="cmt">// Chaining filter + map</span>
+<span class="kw">const</span> availableNames = products
+  .<span class="fn">filter</span>(p <span class="op">=></span> p.inStock)
+  .<span class="fn">map</span>(p <span class="op">=></span> p.name); <span class="cmt">// ['Áo', 'Giày']</span></code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">Core</span><span class="concept-name">reduce — gom thành 1 giá trị</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">reduce — tính toán cart</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="kw">const</span> cart = [
+  { name: <span class="str">'Áo'</span>,   price: <span class="num">200000</span>, qty: <span class="num">2</span> },
+  { name: <span class="str">'Quần'</span>, price: <span class="num">350000</span>, qty: <span class="num">1</span> },
+];
+
+<span class="cmt">// Tổng tiền = Σ (price × qty)</span>
+<span class="kw">const</span> total = cart.<span class="fn">reduce</span>(
+  (sum, item) <span class="op">=></span> sum <span class="op">+</span> item.price <span class="op">*</span> item.qty,
+  <span class="num">0</span> <span class="cmt">// initial value</span>
+); <span class="cmt">// 750000</span>
+
+<span class="cmt">// Group by category — reduce tạo ra object</span>
+<span class="kw">const</span> byCategory = products.<span class="fn">reduce</span>((acc, p) <span class="op">=></span> {
+  acc[p.category] = acc[p.category] <span class="op">||</span> [];
+  acc[p.category].<span class="fn">push</span>(p);
+  <span class="kw">return</span> acc;
+}, {}); <span class="cmt">// { top:[...], bottom:[...] }</span></code></pre>
+    </div>
+  </div>
+
+  <div class="concept">
+    <div class="concept-header"><span class="concept-tag ct-new">Core</span><span class="concept-name">find · some · every · includes</span></div>
+    <div class="code-wrap">
+      <div class="code-header"><span class="code-label">Các methods hay dùng khác</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+      <pre><code><span class="cmt">// find — phần tử đầu tiên match, hoặc undefined</span>
+<span class="kw">const</span> item = cart.<span class="fn">find</span>(i <span class="op">=></span> i.id <span class="op">===</span> <span class="num">5</span>);
+
+<span class="cmt">// findIndex — index hoặc -1</span>
+<span class="kw">const</span> idx = cart.<span class="fn">findIndex</span>(i <span class="op">=></span> i.id <span class="op">===</span> <span class="num">5</span>);
+
+<span class="cmt">// some — có ÍT NHẤT 1 match?</span>
+<span class="kw">const</span> hasExpensive = products.<span class="fn">some</span>(p <span class="op">=></span> p.price <span class="op">></span> <span class="num">400000</span>);
+
+<span class="cmt">// every — TẤT CẢ đều match?</span>
+<span class="kw">const</span> allInStock = products.<span class="fn">every</span>(p <span class="op">=></span> p.inStock);
+
+<span class="cmt">// includes — tìm primitive value</span>
+<span class="kw">const</span> roles = [<span class="str">'admin'</span>, <span class="str">'seller'</span>, <span class="str">'buyer'</span>];
+roles.<span class="fn">includes</span>(<span class="str">'admin'</span>); <span class="cmt">// true</span></code></pre>
+    </div>
+  </div>
+
+  <div class="quiz">
+    <div class="quiz-label">Bài tập cuối khóa</div>
+    <p class="quiz-q">Tính tổng tiền CHỈ các sản phẩm còn hàng (<code>inStock: true</code>) trong cart. Điền vào chỗ trống:<br><code style="font-size:10px;background:var(--bg3);padding:4px 8px;border-radius:4px;display:inline-block;margin-top:6px">const total = cart.___().___((sum, i) => sum + i.price * i.qty, 0);</code></p>
+    <div class="quiz-options">
+      <button class="quiz-opt" onclick="answer(this,false)">A. <code>map(p => p.inStock).reduce(...)</code></button>
+      <button class="quiz-opt" onclick="answer(this,true)">B. <code>filter(p => p.inStock).reduce(...)</code></button>
+      <button class="quiz-opt" onclick="answer(this,false)">C. <code>find(p => p.inStock).reduce(...)</code></button>
+    </div>
+    <div class="quiz-explanation"><strong>Đúng!</strong> <code>filter</code> lấy items còn hàng, rồi <code>reduce</code> tính tổng. Pattern <code>filter().reduce()</code> rất phổ biến trong ecommerce. Bạn đã hoàn thành toàn bộ bài học ES6+ Fundamentals!</div>
+  </div>
+
+  <div class="lesson-footer">
+    <button class="complete-btn" onclick="markDone(this,6)">Đánh dấu hoàn thành ✓</button>
+    <div class="nav-btns"><button class="nav-btn" onclick="goTo(5)">← Trước</button><button class="nav-btn" disabled>Hoàn thành ✓</button></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const LESSONS=[
+  {title:'let, const & var'},
+  {title:'Arrow Functions'},
+  {title:'Destructuring'},
+  {title:'Spread & Rest ...'},
+  {title:'Template Literals & ?.'},
+  {title:'ES Modules'},
+  {title:'Array Methods'},
+];
+let completed=new Set();
+try{completed=new Set(JSON.parse(localStorage.getItem('es6_done')||'[]'))}catch(e){}
+function save(){try{localStorage.setItem('es6_done',JSON.stringify([...completed]))}catch(e){}}
+function updateProgress(){
+  const pct=Math.round(completed.size/LESSONS.length*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=completed.size+' / '+LESSONS.length;
+}
+function buildNav(){
+  const nav=document.getElementById('nav-list');
+  LESSONS.forEach((l,i)=>{
+    const el=document.createElement('div');
+    el.className='nav-item'+(i===0?' active':'')+(completed.has(i)?' done':'');
+    el.id='nav-'+i;
+    el.innerHTML=`<span class="nav-num">${completed.has(i)?'✓':(i+1)}</span>${l.title}`;
+    if(completed.has(i)){el.querySelector('.nav-num').style.cssText='background:var(--accent);color:var(--bg)'}
+    el.addEventListener('click',()=>goTo(i));
+    nav.appendChild(el);
+  });
+  updateProgress();
+}
+function goTo(idx){
+  document.querySelectorAll('.lesson').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.querySelector('.lesson[data-id="'+idx+'"]').classList.add('active');
+  document.getElementById('nav-'+idx).classList.add('active');
+  window.scrollTo(0,0);
+}
+function markDone(btn,idx){
+  if(completed.has(idx))return;
+  completed.add(idx);save();
+  btn.textContent='Đã hoàn thành ✓';btn.classList.add('done');
+  const navEl=document.getElementById('nav-'+idx);
+  navEl.classList.add('done');
+  const num=navEl.querySelector('.nav-num');
+  num.textContent='✓';num.style.cssText='background:var(--accent);color:var(--bg)';
+  updateProgress();
+}
+function answer(btn,correct){
+  const quiz=btn.closest('.quiz');
+  if(quiz.dataset.answered)return;
+  quiz.dataset.answered='1';
+  quiz.querySelectorAll('.quiz-opt').forEach(b=>b.disabled=true);
+  btn.classList.add(correct?'correct':'wrong');
+  if(!correct){
+    quiz.querySelectorAll('.quiz-opt').forEach(b=>{
+      if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes('true'))b.classList.add('correct');
+    });
+  }
+  quiz.querySelector('.quiz-explanation').classList.add('show');
+}
+function copyCode(btn){
+  const text=btn.closest('.code-wrap').querySelector('pre').innerText||'';
+  navigator.clipboard.writeText(text).then(()=>{
+    btn.textContent='copied!';
+    setTimeout(()=>btn.textContent='copy',1500);
+  }).catch(()=>{});
+}
+document.querySelectorAll('.lesson').forEach(lesson=>{
+  const idx=parseInt(lesson.dataset.id);
+  if(completed.has(idx)){
+    const btn=lesson.querySelector('.complete-btn');
+    if(btn){btn.textContent='Đã hoàn thành ✓';btn.classList.add('done');}
+  }
+});
+buildNav();
+</script>
+</body>
+</html>
